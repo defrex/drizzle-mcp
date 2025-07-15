@@ -4,8 +4,8 @@ import { sql } from "drizzle-orm";
 import type { DrizzleConfig } from "./config.js";
 
 // Dynamic imports for optional database drivers
-let Database: typeof import("better-sqlite3").default | null = null;
-let postgres: typeof import("postgres").default | null = null;
+let Database: any = null;
+let postgres: any = null;
 
 /**
  * Manages database connections and provides query execution capabilities
@@ -63,7 +63,8 @@ export class DatabaseManager {
 
     if (!this.client) {
       try {
-        postgres = (await import("postgres")).default;
+        const postgresModule = await import("postgres" as any);
+        postgres = postgresModule.default;
         this.client = postgres(connectionString);
         this.db = drizzlePostgres(this.client);
       } catch (error) {

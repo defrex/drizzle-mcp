@@ -1,5 +1,5 @@
 {
-  "name": "drizzle-mcp-server",
+  "name": "drizzle-mcp",
   "version": "1.0.0",
   "description": "A Model Context Protocol (MCP) server for Drizzle ORM database operations",
   "main": "dist/index.js",
@@ -8,11 +8,17 @@
   },
   "type": "module",
   "scripts": {
-    "build": "tsc && echo '#!/usr/bin/env node' | cat - dist/cli.js > temp && mv temp dist/cli.js && chmod +x dist/cli.js",
+    "build": "tsc && printf '#!/usr/bin/env node\n' | cat - dist/cli.js > temp && mv temp dist/cli.js && chmod +x dist/cli.js",
     "dev": "tsx src/cli.ts",
     "prepublishOnly": "npm run build"
   },
-  "keywords": ["mcp", "drizzle", "orm", "database", "model-context-protocol"],
+  "keywords": [
+    "mcp",
+    "drizzle",
+    "orm",
+    "database",
+    "model-context-protocol"
+  ],
   "author": "Your Name",
   "license": "MIT",
   "repository": {

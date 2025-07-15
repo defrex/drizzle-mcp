@@ -55,7 +55,8 @@ export class DatabaseManager {
         }
         if (!this.client) {
             try {
-                postgres = (await import("postgres")).default;
+                const postgresModule = await import("postgres");
+                postgres = postgresModule.default;
                 this.client = postgres(connectionString);
                 this.db = drizzlePostgres(this.client);
             }
