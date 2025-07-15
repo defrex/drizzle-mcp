@@ -9,19 +9,33 @@ A Model Context Protocol (MCP) server that provides access to Drizzle ORM databa
 - **Schema Introspection**: Explore database tables and schema information
 - **Database Resources**: Browse tables and schema through MCP resources
 - **Cross-Project Compatibility**: Works with any existing Drizzle project
+- **Multi-Database Support**: SQLite and PostgreSQL with automatic driver detection
+- **Environment Variable Support**: Automatic .env file loading for database credentials
+- **Flexible Installation**: Install globally, run with npx/bunx, or use as a linked package
 
 ## Installation
 
-Install directly from GitHub:
+### Option 1: Install globally from GitHub
 
 ```bash
 npm install -g github:defrex/drizzle-mcp
 ```
 
-Or run directly with npx (no installation required):
+### Option 2: Run directly with npx/bunx (no installation required)
 
 ```bash
 npx github:defrex/drizzle-mcp --help
+bunx github:defrex/drizzle-mcp --help
+```
+
+### Option 3: Link for development (if working on the package)
+
+```bash
+# In the drizzle-mcp directory
+bun link
+
+# In your project directory
+bun link drizzle-mcp
 ```
 
 ## Usage
@@ -92,6 +106,27 @@ The server automatically detects your Drizzle configuration from:
 
 Your Drizzle config should be a standard drizzle-kit configuration file.
 
+### Environment Variables
+
+The server automatically loads environment variables from `.env.local` and `.env` files in your project directory. This is useful for database credentials:
+
+```bash
+# .env.local
+DATABASE_URL=postgresql://username:password@localhost:5432/database
+```
+
+The server will detect and use `DATABASE_URL` from your environment variables, so you can use it in your drizzle config:
+
+```typescript
+export default defineConfig({
+  dialect: 'postgresql',
+  dbCredentials: {
+    url: process.env.DATABASE_URL!,
+  },
+  // ...
+});
+```
+
 ### Available Tools
 
 1. **drizzle_generate_migration** - Generate new migration files
@@ -102,8 +137,10 @@ Your Drizzle config should be a standard drizzle-kit configuration file.
 
 ### Available Resources
 
-1. **sqlite://tables** - List all database tables
-2. **sqlite://schema** - Complete database schema information
+1. **database://tables** - List all database tables
+2. **database://schema** - Complete database schema information
+
+*Note: Resources are database-agnostic and work with both SQLite and PostgreSQL*
 
 ## Requirements
 
@@ -111,8 +148,10 @@ Your Drizzle config should be a standard drizzle-kit configuration file.
 - An existing Drizzle project with:
   - `drizzle-orm` >= 0.40.0
   - `drizzle-kit` >= 0.30.0
-  - `better-sqlite3` >= 9.0.0 (for SQLite projects)
-  - `postgres` >= 3.4.0 (for PostgreSQL projects)
+  - For SQLite: `better-sqlite3` >= 9.0.0
+  - For PostgreSQL: `pg` >= 8.0.0 OR `postgres` >= 3.4.0
+
+*Note: The server automatically detects which database driver you have installed and uses the appropriate one.*
 
 ## Example Configuration
 
@@ -141,7 +180,7 @@ export default defineConfig({
   schema: "./src/schema.ts",
   dialect: "postgresql",
   dbCredentials: {
-    url: "postgresql://username:password@localhost:5432/database",
+    url: process.env.DATABASE_URL!,
     // Or use individual credentials:
     // host: "localhost",
     // port: 5432,
@@ -152,11 +191,15 @@ export default defineConfig({
 });
 ```
 
+*Note: The server supports both `pg` (node-postgres) and `postgres` (postgres-js) drivers. It will automatically detect which one you have installed and use the appropriate one.*
+
 ## Supported Databases
 
 Currently supports:
-- **SQLite** - Via better-sqlite3
-- **PostgreSQL** - Via postgres-js
+- **SQLite** - Via `better-sqlite3`
+- **PostgreSQL** - Via `pg` (node-postgres) or `postgres` (postgres-js)
+
+The server automatically detects which database drivers you have installed and uses the appropriate ones. For PostgreSQL, it will try `postgres` first, then fall back to `pg`.
 
 Support for MySQL is planned for future releases.
 
@@ -168,15 +211,24 @@ The server is built with:
 - **Drizzle ORM** - Database ORM and query builder
 - **Commander.js** - CLI argument parsing
 - **MCP SDK** - Model Context Protocol implementation
+- **dotenv** - Environment variable loading
 
 ### Building from Source
 
 ```bash
 git clone https://github.com/defrex/drizzle-mcp.git
 cd drizzle-mcp
-npm install
-npm run build
+bun install
+bun run build
 ```
+
+### Key Features
+
+- **Automatic Module Resolution**: Resolves database drivers and drizzle-orm from your project's dependencies
+- **Environment Variable Loading**: Automatically loads `.env.local` and `.env` files from your project
+- **Cross-Platform**: Works with npm, bun, and various package managers
+- **Comprehensive Error Handling**: Detailed error messages with context for easier debugging
+- **Security**: Input validation and sanitization for all user inputs
 
 ## License
 
