@@ -12,16 +12,16 @@ A Model Context Protocol (MCP) server that provides access to Drizzle ORM databa
 
 ## Installation
 
-Install globally via npm:
+Install directly from GitHub:
 
 ```bash
-npm install -g drizzle-mcp
+npm install -g github:defrex/drizzle-mcp
 ```
 
 Or use with npx:
 
 ```bash
-npx drizzle-mcp
+npx github:defrex/drizzle-mcp
 ```
 
 ## Usage
@@ -49,7 +49,7 @@ Add to your Claude Desktop configuration:
   "mcpServers": {
     "drizzle": {
       "command": "npx",
-      "args": ["drizzle-mcp", "./drizzle.config.ts"]
+      "args": ["github:defrex/drizzle-mcp", "./drizzle.config.ts"]
     }
   }
 }
@@ -136,7 +136,7 @@ The server is built with:
 ### Building from Source
 
 ```bash
-git clone https://github.com/yourusername/drizzle-mcp.git
+git clone https://github.com/defrex/drizzle-mcp.git
 cd drizzle-mcp
 npm install
 npm run build
