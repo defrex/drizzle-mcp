@@ -1,11 +1,13 @@
 import { drizzle as drizzleSqlite } from "drizzle-orm/better-sqlite3";
-import { drizzle as drizzlePostgres } from "drizzle-orm/postgres-js";
+import { drizzle as drizzlePostgresJs } from "drizzle-orm/postgres-js";
+import { drizzle as drizzlePostgresPg } from "drizzle-orm/node-postgres";
 import { sql } from "drizzle-orm";
 import type { DrizzleConfig } from "./config.js";
 
 // Dynamic imports for optional database drivers
 let Database: any = null;
 let postgres: any = null;
+let pg: any = null;
 
 /**
  * Manages database connections and provides query execution capabilities
@@ -62,13 +64,21 @@ export class DatabaseManager {
     }
 
     if (!this.client) {
+      // Try postgres-js first, then fall back to pg
       try {
         const postgresModule = await import("postgres" as any);
         postgres = postgresModule.default;
         this.client = postgres(connectionString);
-        this.db = drizzlePostgres(this.client);
-      } catch (error) {
-        throw new Error("postgres is required for PostgreSQL databases. Install it with: npm install postgres");
+        this.db = drizzlePostgresJs(this.client);
+      } catch (postgresError) {
+        try {
+          const pgModule = await import("pg" as any);
+          const { Pool } = pgModule;
+          this.client = new Pool({ connectionString });
+          this.db = drizzlePostgresPg(this.client);
+        } catch (pgError) {
+          throw new Error("Either 'postgres' or 'pg' is required for PostgreSQL databases. Install one with: npm install postgres OR npm install pg");
+        }
       }
     }
   }
@@ -116,7 +126,16 @@ export class DatabaseManager {
       }
     } else if (this.config?.dialect === "postgresql") {
       const client = this.getClient();
-      return await client.unsafe(query, params);
+      
+      // Check if it's postgres-js (has unsafe method) or pg (has query method)
+      if (client.unsafe) {
+        return await client.unsafe(query, params);
+      } else if (client.query) {
+        const result = await client.query(query, params);
+        return result.rows;
+      }
+      
+      throw new Error("Unknown PostgreSQL client type");
     }
     
     throw new Error(`Query execution not implemented for dialect: ${this.config?.dialect}`);
@@ -132,11 +151,24 @@ export class DatabaseManager {
       return client.prepare("SELECT name FROM sqlite_master WHERE type='table'").all();
     } else if (this.config?.dialect === "postgresql") {
       const client = this.getClient();
-      return await client`
-        SELECT tablename as name 
-        FROM pg_tables 
-        WHERE schemaname = 'public'
-      `;
+      
+      // Check if it's postgres-js (template literal) or pg (query method)
+      if (client.unsafe) {
+        return await client`
+          SELECT tablename as name 
+          FROM pg_tables 
+          WHERE schemaname = 'public'
+        `;
+      } else if (client.query) {
+        const result = await client.query(`
+          SELECT tablename as name 
+          FROM pg_tables 
+          WHERE schemaname = 'public'
+        `);
+        return result.rows;
+      }
+      
+      throw new Error("Unknown PostgreSQL client type");
     }
     
     throw new Error(`getTables not implemented for dialect: ${this.config?.dialect}`);
@@ -152,13 +184,28 @@ export class DatabaseManager {
       return client.prepare("SELECT name, sql FROM sqlite_master WHERE type='table'").all();
     } else if (this.config?.dialect === "postgresql") {
       const client = this.getClient();
-      return await client`
-        SELECT 
-          t.tablename as name,
-          'CREATE TABLE ' || t.tablename || ' (...);' as sql
-        FROM pg_tables t
-        WHERE t.schemaname = 'public'
-      `;
+      
+      // Check if it's postgres-js (template literal) or pg (query method)
+      if (client.unsafe) {
+        return await client`
+          SELECT 
+            t.tablename as name,
+            'CREATE TABLE ' || t.tablename || ' (...);' as sql
+          FROM pg_tables t
+          WHERE t.schemaname = 'public'
+        `;
+      } else if (client.query) {
+        const result = await client.query(`
+          SELECT 
+            t.tablename as name,
+            'CREATE TABLE ' || t.tablename || ' (...);' as sql
+          FROM pg_tables t
+          WHERE t.schemaname = 'public'
+        `);
+        return result.rows;
+      }
+      
+      throw new Error("Unknown PostgreSQL client type");
     }
     
     throw new Error(`getSchema not implemented for dialect: ${this.config?.dialect}`);
@@ -172,6 +219,7 @@ export class DatabaseManager {
       if (this.config?.dialect === "sqlite") {
         this.client.close();
       } else if (this.config?.dialect === "postgresql") {
+        // Both postgres-js and pg have an end() method
         this.client.end();
       }
       this.client = null;

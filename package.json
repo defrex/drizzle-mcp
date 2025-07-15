@@ -49,13 +49,17 @@
     "drizzle-kit": ">=0.30.0",
     "drizzle-orm": ">=0.40.0",
     "better-sqlite3": ">=9.0.0",
-    "pg": ">=8.0.0"
+    "pg": ">=8.0.0",
+    "postgres": ">=3.4.0"
   },
   "peerDependenciesMeta": {
     "better-sqlite3": {
       "optional": true
     },
     "pg": {
+      "optional": true
+    },
+    "postgres": {
       "optional": true
     }
   }
