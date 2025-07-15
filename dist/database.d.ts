@@ -1,13 +1,11 @@
-import { drizzle } from "drizzle-orm/better-sqlite3";
-import Database from "better-sqlite3";
 import type { DrizzleConfig } from "./config.js";
 /**
  * Manages database connections and provides query execution capabilities
- * Currently supports SQLite databases via better-sqlite3
+ * Supports SQLite (better-sqlite3) and PostgreSQL (postgres-js)
  */
 export declare class DatabaseManager {
     private db;
-    private sqlite;
+    private client;
     private config;
     /**
      * Initialize the database connection using the provided configuration
@@ -15,18 +13,20 @@ export declare class DatabaseManager {
      * @throws Error if database type is unsupported or credentials are missing
      */
     initialize(config: DrizzleConfig): Promise<void>;
+    private initializeSQLite;
+    private initializePostgreSQL;
     /**
      * Get the initialized Drizzle database instance
      * @returns Drizzle database instance
      * @throws Error if database is not initialized
      */
-    getDb(): ReturnType<typeof drizzle>;
+    getDb(): any;
     /**
-     * Get the raw SQLite database instance
-     * @returns Better-sqlite3 database instance
+     * Get the raw database client instance
+     * @returns Database client instance (SQLite or PostgreSQL)
      * @throws Error if database is not initialized
      */
-    getSqlite(): Database.Database;
+    getClient(): any;
     /**
      * Execute a raw SQL query with optional parameters
      * WARNING: This executes arbitrary SQL - ensure queries are trusted

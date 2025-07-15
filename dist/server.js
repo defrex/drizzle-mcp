@@ -8,8 +8,8 @@ import { DatabaseManager } from "./database.js";
 const execAsync = promisify(exec);
 // Resource URI constants
 const RESOURCE_URIS = {
-    TABLES: "sqlite://tables",
-    SCHEMA: "sqlite://schema",
+    TABLES: "database://tables",
+    SCHEMA: "database://schema",
 };
 // Input validation helper
 function validateMigrationName(name) {

@@ -112,10 +112,11 @@ Your Drizzle config should be a standard drizzle-kit configuration file.
   - `drizzle-orm` >= 0.40.0
   - `drizzle-kit` >= 0.30.0
   - `better-sqlite3` >= 9.0.0 (for SQLite projects)
+  - `postgres` >= 3.4.0 (for PostgreSQL projects)
 
 ## Example Configuration
 
-Example `drizzle.config.ts`:
+### SQLite Configuration
 
 ```typescript
 import { defineConfig } from "drizzle-kit";
@@ -130,12 +131,34 @@ export default defineConfig({
 });
 ```
 
+### PostgreSQL Configuration
+
+```typescript
+import { defineConfig } from "drizzle-kit";
+
+export default defineConfig({
+  out: "./migrations",
+  schema: "./src/schema.ts",
+  dialect: "postgresql",
+  dbCredentials: {
+    url: "postgresql://username:password@localhost:5432/database",
+    // Or use individual credentials:
+    // host: "localhost",
+    // port: 5432,
+    // user: "username",
+    // password: "password",
+    // database: "database",
+  },
+});
+```
+
 ## Supported Databases
 
 Currently supports:
 - **SQLite** - Via better-sqlite3
+- **PostgreSQL** - Via postgres-js
 
-Support for PostgreSQL and MySQL is planned for future releases.
+Support for MySQL is planned for future releases.
 
 ## Development
 

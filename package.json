@@ -30,6 +30,7 @@
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^20.0.0",
+    "@types/pg": "^8.15.4",
     "tsx": "^4.0.0",
     "typescript": "^5.0.0"
   },
@@ -41,6 +42,15 @@
   "peerDependencies": {
     "drizzle-kit": ">=0.30.0",
     "drizzle-orm": ">=0.40.0",
-    "better-sqlite3": ">=9.0.0"
+    "better-sqlite3": ">=9.0.0",
+    "pg": ">=8.0.0"
+  },
+  "peerDependenciesMeta": {
+    "better-sqlite3": {
+      "optional": true
+    },
+    "pg": {
+      "optional": true
+    }
   }
 }

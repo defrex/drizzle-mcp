@@ -15,8 +15,8 @@ const execAsync = promisify(exec);
 
 // Resource URI constants
 const RESOURCE_URIS = {
-  TABLES: "sqlite://tables",
-  SCHEMA: "sqlite://schema",
+  TABLES: "database://tables",
+  SCHEMA: "database://schema",
 } as const;
 
 // Input validation helper
