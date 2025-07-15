@@ -35,7 +35,7 @@ export class DrizzleMCPServer {
      */
     constructor(cwd) {
         this.configLoader = new ConfigLoader({ cwd });
-        this.databaseManager = new DatabaseManager();
+        this.databaseManager = new DatabaseManager(cwd || process.cwd());
         this.server = new Server({
             name: "drizzle-mcp-server",
             version: "1.0.0",

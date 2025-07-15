@@ -1,3 +1,5 @@
+import { createRequire } from "node:module";
+import { resolve } from "node:path";
 // Dynamic imports for optional database drivers
 let Database = null;
 let postgres = null;
@@ -10,6 +12,23 @@ export class DatabaseManager {
     db = null;
     client = null;
     config = null;
+    projectRoot;
+    constructor(projectRoot) {
+        this.projectRoot = projectRoot;
+    }
+    /**
+     * Helper to resolve and import modules from the target project
+     */
+    async importFromProject(moduleName) {
+        try {
+            const require = createRequire(resolve(this.projectRoot, "package.json"));
+            const modulePath = require.resolve(moduleName);
+            return await import(modulePath);
+        }
+        catch (error) {
+            throw new Error(`Failed to import ${moduleName} from project root ${this.projectRoot}: ${error instanceof Error ? error.message : String(error)}`);
+        }
+    }
     /**
      * Initialize the database connection using the provided configuration
      * @param config Validated Drizzle configuration
@@ -33,8 +52,9 @@ export class DatabaseManager {
         }
         if (!this.client) {
             try {
-                Database = (await import("better-sqlite3")).default;
-                const { drizzle } = await import("drizzle-orm/better-sqlite3");
+                const sqliteModule = await this.importFromProject("better-sqlite3");
+                const { drizzle } = await this.importFromProject("drizzle-orm/better-sqlite3");
+                Database = sqliteModule.default;
                 this.client = new Database(config.dbCredentials.url);
                 this.db = drizzle(this.client);
             }
@@ -56,22 +76,22 @@ export class DatabaseManager {
         if (!this.client) {
             // Try postgres-js first, then fall back to pg
             try {
-                const postgresModule = await import("postgres");
-                const { drizzle } = await import("drizzle-orm/postgres-js");
+                const postgresModule = await this.importFromProject("postgres");
+                const { drizzle } = await this.importFromProject("drizzle-orm/postgres-js");
                 postgres = postgresModule.default;
                 this.client = postgres(connectionString);
                 this.db = drizzle(this.client);
             }
             catch (postgresError) {
                 try {
-                    const pgModule = await import("pg");
-                    const { drizzle } = await import("drizzle-orm/node-postgres");
+                    const pgModule = await this.importFromProject("pg");
+                    const { drizzle } = await this.importFromProject("drizzle-orm/node-postgres");
                     const { Pool } = pgModule;
                     this.client = new Pool({ connectionString });
                     this.db = drizzle(this.client);
                 }
                 catch (pgError) {
-                    throw new Error("Either 'postgres' or 'pg' is required for PostgreSQL databases. Install one with: npm install postgres OR npm install pg");
+                    throw new Error(`Either 'postgres' or 'pg' is required for PostgreSQL databases. Install one with: npm install postgres OR npm install pg. Project root: ${this.projectRoot}. PG Error: ${pgError instanceof Error ? pgError.message : String(pgError)}`);
                 }
             }
         }

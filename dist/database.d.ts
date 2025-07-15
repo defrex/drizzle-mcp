@@ -7,6 +7,12 @@ export declare class DatabaseManager {
     private db;
     private client;
     private config;
+    private projectRoot;
+    constructor(projectRoot: string);
+    /**
+     * Helper to resolve and import modules from the target project
+     */
+    private importFromProject;
     /**
      * Initialize the database connection using the provided configuration
      * @param config Validated Drizzle configuration
