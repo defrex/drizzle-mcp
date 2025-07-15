@@ -1,6 +1,3 @@
-import { drizzle as drizzleSqlite } from "drizzle-orm/better-sqlite3";
-import { drizzle as drizzlePostgresJs } from "drizzle-orm/postgres-js";
-import { drizzle as drizzlePostgresPg } from "drizzle-orm/node-postgres";
 import { sql } from "drizzle-orm";
 import type { DrizzleConfig } from "./config.js";
 
@@ -43,8 +40,9 @@ export class DatabaseManager {
     if (!this.client) {
       try {
         Database = (await import("better-sqlite3")).default;
+        const { drizzle } = await import("drizzle-orm/better-sqlite3");
         this.client = new Database(config.dbCredentials.url);
-        this.db = drizzleSqlite(this.client);
+        this.db = drizzle(this.client);
       } catch (error) {
         throw new Error("better-sqlite3 is required for SQLite databases. Install it with: npm install better-sqlite3");
       }
@@ -67,15 +65,17 @@ export class DatabaseManager {
       // Try postgres-js first, then fall back to pg
       try {
         const postgresModule = await import("postgres" as any);
+        const { drizzle } = await import("drizzle-orm/postgres-js");
         postgres = postgresModule.default;
         this.client = postgres(connectionString);
-        this.db = drizzlePostgresJs(this.client);
+        this.db = drizzle(this.client);
       } catch (postgresError) {
         try {
           const pgModule = await import("pg" as any);
+          const { drizzle } = await import("drizzle-orm/node-postgres");
           const { Pool } = pgModule;
           this.client = new Pool({ connectionString });
-          this.db = drizzlePostgresPg(this.client);
+          this.db = drizzle(this.client);
         } catch (pgError) {
           throw new Error("Either 'postgres' or 'pg' is required for PostgreSQL databases. Install one with: npm install postgres OR npm install pg");
         }
