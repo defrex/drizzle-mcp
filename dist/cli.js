@@ -2,6 +2,7 @@
 import { Command } from "commander";
 import { DrizzleMCPServer } from "./server.js";
 import { resolve } from "node:path";
+import { config } from "dotenv";
 const program = new Command();
 program
     .name("drizzle-mcp")
@@ -15,10 +16,14 @@ program
     .action(async (configArg, options) => {
     const configPath = options.config || configArg;
     const cwd = resolve(options.cwd);
+    // Load environment variables from .env files in the target project
+    config({ path: resolve(cwd, ".env.local") });
+    config({ path: resolve(cwd, ".env") });
     if (options.verbose) {
         console.error(`Starting Drizzle MCP Server...`);
         console.error(`Working directory: ${cwd}`);
         console.error(`Config file: ${configPath || "auto-detected"}`);
+        console.error(`DATABASE_URL: ${process.env.DATABASE_URL ? 'loaded' : 'not found'}`);
     }
     const server = new DrizzleMCPServer(cwd);
     try {
