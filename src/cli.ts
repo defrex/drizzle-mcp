@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 import { Command } from "commander";
 import { DrizzleMCPServer } from "./server.js";
 import { resolve } from "node:path";

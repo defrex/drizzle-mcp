@@ -18,10 +18,10 @@ Install directly from GitHub:
 npm install -g github:defrex/drizzle-mcp
 ```
 
-Or use with npx:
+Or run directly with npx (no installation required):
 
 ```bash
-npx github:defrex/drizzle-mcp
+npx github:defrex/drizzle-mcp --help
 ```
 
 ## Usage
@@ -49,6 +49,19 @@ Add to your Claude Desktop configuration:
   "mcpServers": {
     "drizzle": {
       "command": "npx",
+      "args": ["github:defrex/drizzle-mcp", "./drizzle.config.ts"]
+    }
+  }
+}
+```
+
+Or with bunx:
+
+```json
+{
+  "mcpServers": {
+    "drizzle": {
+      "command": "bunx",
       "args": ["github:defrex/drizzle-mcp", "./drizzle.config.ts"]
     }
   }

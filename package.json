@@ -8,7 +8,7 @@
   },
   "type": "module",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && echo '#!/usr/bin/env node' | cat - dist/cli.js > temp && mv temp dist/cli.js && chmod +x dist/cli.js",
     "dev": "tsx src/cli.ts",
     "prepublishOnly": "npm run build"
   },
